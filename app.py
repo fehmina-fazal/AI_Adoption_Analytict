@@ -11,7 +11,21 @@ st.title("AI Adoption Analytics Dashboard")
 
 @st.cache_data
 def load_data():
-    return pd.read_csv("Dataset.csv").head(1000)
+    df = pd.read_csv("Dataset.csv").head(1000)
+    
+    # Text values (Increased, Decreased, Same) ko numbers mein convert karne ke liye
+    if "Productivity_Change" in df.columns:
+        df["Productivity_Change"] = df["Productivity_Change"].astype(str).str.replace("%", "").str.strip()
+        
+        # Text values ko numeric values se map kiya
+        mapping = {"Increased": 15.0, "Same": 0.0, "Decreased": -10.0}
+        df["Productivity_Change"] = df["Productivity_Change"].replace(mapping)
+        
+        # Column ko float/numeric banaya
+        df["Productivity_Change"] = pd.to_numeric(df["Productivity_Change"], errors='coerce')
+        df["Productivity_Change"] = df["Productivity_Change"].fillna(0.0)
+        
+    return df
 
 df = load_data()
 
@@ -25,7 +39,7 @@ st.metric("Average AI Usage (hrs)", round(df["Daily_AI_Usage_Hours"].mean(),2))
 # Column mein se agar koi extra spaces ya symbols hain unhe clean karne ke liye aur numbers mein badalne ke liye:
 df["Productivity_Change"] = df["Productivity_Change"].astype(str).str.replace("%", "").str.strip()
 df["Productivity_Change"] = pd.to_numeric(df["Productivity_Change"], errors='coerce')
-st.metric("Average Productivity Change", round(df["Productivity_Change"].mean(),2))
+st.metric("Average Productivity Change", f"{round(df['Productivity_Change'].mean(), 2)}%")
 
 st.subheader("Industry Distribution")
 st.plotly_chart(px.histogram(df, x="Industry"), use_container_width=True)
