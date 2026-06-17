@@ -22,6 +22,9 @@ if industry != "All":
 
 st.metric("Employees", len(df))
 st.metric("Average AI Usage (hrs)", round(df["Daily_AI_Usage_Hours"].mean(),2))
+# Column mein se agar koi extra spaces ya symbols hain unhe clean karne ke liye aur numbers mein badalne ke liye:
+df["Productivity_Change"] = df["Productivity_Change"].astype(str).str.replace("%", "").str.strip()
+df["Productivity_Change"] = pd.to_numeric(df["Productivity_Change"], errors='coerce')
 st.metric("Average Productivity Change", round(df["Productivity_Change"].mean(),2))
 
 st.subheader("Industry Distribution")
